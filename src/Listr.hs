@@ -3,15 +3,17 @@ module Listr
     ) where
 
 import System.Directory (getDirectoryContents, doesFileExist, pathIsSymbolicLink, canonicalizePath, getCurrentDirectory)
-import System.FilePath.Posix ((</>))
+import System.FilePath.Posix ((</>), makeRelative)
 
 listContents :: FilePath -> IO [String]
-listContents path = do conts <- getDirectoryContents path
+listContents path = do contents <- getDirectoryContents path
                        currPath <- getCurrentDirectory
-                       let conds  = [(/= '.').head]
-                       let filt   = \x -> all ($x) conds
-                       let nonDots = filter filt conts
-                       paths <- mapM (canonicalizePath.((currPath </> path) </>)) nonDots
+                       -- A list of conditions the paths must satisfy.
+                       let conds = [
+                             (/= '.').head -- Ignore hidden (Linux only).
+                             ] :: [FilePath -> Bool]
+                           filtered = filter (\x -> all ($x) conds) contents
+                           paths = map (makeRelative currPath . (path </>)) filtered
                        onlyFiles paths
   where onlyFiles []    = return []
         onlyFiles (f:fs) = do exist <- doesFileExist f
