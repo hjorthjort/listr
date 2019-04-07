@@ -5,7 +5,7 @@ Tiny tool for listing directory contents.
 Usage
 -----
 
-Give a list of directories, and it will list all the files in them, non-recursively.
+Give a list of directories, and it will list all the files in them, recursively.
 
 ```sh
 $ listr src/ app/
