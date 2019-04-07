@@ -23,15 +23,19 @@ listContents path = do contents <- getDirectoryContents path
                              (/= '.').head -- Ignore hidden (Linux only).
                              ] :: [FilePath -> Bool]
                            filtered = filter (\x -> all ($x) conds) contents
-                           paths = map (makeRelative currPath . (path </>)) filtered
-                       onlyFiles paths
-  where onlyFiles []    = return []
-        onlyFiles (f:fs) = do exist <- doesFileExist f
-                              sym   <- pathIsSymbolicLink f
-                              rest  <- onlyFiles fs
-                              return $ if exist || sym then f:rest else rest
+                           paths = map ((path </>)) filtered
+                       files <- onlyFiles paths
+                       dirs  <- onlyDirs paths
+                       recursiveFiles <- concat <$> mapM listContents dirs
+                       let uncleanRes = files ++ recursiveFiles
+                           cleanedRes = makeRelative currPath <$> uncleanRes
+                       return cleanedRes
+  where
     onlyFiles :: [FilePath] -> IO [FilePath]
     onlyFiles = filterPaths doesFileExist
+    onlyDirs :: [FilePath] -> IO [FilePath]
+    onlyDirs = filterPaths doesDirectoryExist
+
 -- | Retain only paths matching the given (monadic) predicate.
 -- Follows symbolic links.
 filterPaths :: (FilePath -> IO Bool) -> [FilePath] -> IO [FilePath]
