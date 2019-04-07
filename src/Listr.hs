@@ -1,4 +1,4 @@
-module Lib
+module Listr
     ( listContents
     ) where
 
