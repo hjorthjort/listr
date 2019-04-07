@@ -13,10 +13,12 @@ import System.Directory (
   )
 import System.FilePath.Posix ((</>), makeRelative, takeDirectory)
 
+-- | Recursively get all non-hidden (starting with ".") files from a given directory.
+-- Follows symbolic links.
 listContents :: FilePath -> IO [String]
 listContents path = do contents <- getDirectoryContents path
                        currPath <- getCurrentDirectory
-                       -- A list of conditions the paths must satisfy.
+                       -- A list of conditions the contents of the path must satisfy.
                        let conds = [
                              (/= '.').head -- Ignore hidden (Linux only).
                              ] :: [FilePath -> Bool]
