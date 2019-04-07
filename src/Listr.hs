@@ -51,9 +51,9 @@ filterPaths predM (f:fs) = do sym   <- pathIsSymbolicLink f
                                 then do targ <- getSymbolicLinkTarget f
                                         let dir = takeDirectory f
                                             f'  = dir </> targ
-                                        exist <- doesPathExist targ
+                                        exist <- doesPathExist f'
                                         if exist
-                                          then filterPaths predM ((dir</>f'):fs)
-                                          else filterPaths predM fs
+                                          then filterPaths predM (f':fs)
+                                          else return rest
                                 else do valid <- predM f
                                         return $ if valid then f:rest else rest
