@@ -28,3 +28,17 @@ listContents path = do contents <- getDirectoryContents path
                               sym   <- pathIsSymbolicLink f
                               rest  <- onlyFiles fs
                               return $ if exist || sym then f:rest else rest
+    onlyFiles :: [FilePath] -> IO [FilePath]
+    onlyFiles = filterPaths doesFileExist
+-- | Retain only paths matching the given (monadic) predicate.
+-- Follows symbolic links.
+filterPaths :: (FilePath -> IO Bool) -> [FilePath] -> IO [FilePath]
+filterPaths _     []     = return []
+filterPaths predM (f:fs) = do sym <- pathIsSymbolicLink f
+                              if sym
+                                then do f' <- getSymbolicLinkTarget f
+                                        let dir = takeDirectory f
+                                        filterPaths predM ((dir</>f'):fs)
+                                else do valid <- predM f
+                                        rest  <- filterPaths predM fs
+                                        return $ if valid then f:rest else rest
