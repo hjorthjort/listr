@@ -2,8 +2,16 @@ module Listr
     ( listContents
     ) where
 
-import System.Directory (getDirectoryContents, doesFileExist, pathIsSymbolicLink, canonicalizePath, getCurrentDirectory)
-import System.FilePath.Posix ((</>), makeRelative)
+import System.Directory (
+    getDirectoryContents
+  , doesFileExist
+  , doesDirectoryExist
+  , pathIsSymbolicLink
+  , canonicalizePath
+  , getCurrentDirectory
+  , getSymbolicLinkTarget
+  )
+import System.FilePath.Posix ((</>), makeRelative, takeDirectory)
 
 listContents :: FilePath -> IO [String]
 listContents path = do contents <- getDirectoryContents path
