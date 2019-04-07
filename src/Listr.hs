@@ -13,7 +13,6 @@ import System.Directory (
   , getSymbolicLinkTarget
   )
 import System.FilePath.Posix ((</>), makeRelative, takeDirectory)
-import Data.List (nub)
 
 -- | Recursively get all non-hidden (starting with ".") files from a given directory.
 -- Follows symbolic links.
