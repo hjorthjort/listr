@@ -5,6 +5,7 @@ module Listr
 import System.Directory (
     getDirectoryContents
   , doesFileExist
+  , doesPathExist
   , doesDirectoryExist
   , pathIsSymbolicLink
   , canonicalizePath
@@ -44,11 +45,15 @@ listContents' path = do contents <- getDirectoryContents path
 -- Follows symbolic links.
 filterPaths :: (FilePath -> IO Bool) -> [FilePath] -> IO [FilePath]
 filterPaths _     []     = return []
-filterPaths predM (f:fs) = do sym <- pathIsSymbolicLink f
+filterPaths predM (f:fs) = do sym   <- pathIsSymbolicLink f
+                              rest  <- filterPaths predM fs
                               if sym
-                                then do f' <- getSymbolicLinkTarget f
+                                then do targ <- getSymbolicLinkTarget f
                                         let dir = takeDirectory f
-                                        filterPaths predM ((dir</>f'):fs)
+                                            f'  = dir </> targ
+                                        exist <- doesPathExist targ
+                                        if exist
+                                          then filterPaths predM ((dir</>f'):fs)
+                                          else filterPaths predM fs
                                 else do valid <- predM f
-                                        rest  <- filterPaths predM fs
                                         return $ if valid then f:rest else rest
