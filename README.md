@@ -1,3 +1,13 @@
+# NOTE
+
+This was a fun project, but can be entirerly replaced by the following regular shell command:
+
+```sh
+function listr() {
+    find $@ -not -path '*/\.*' -type f
+}
+```
+
 # listr
 
 Tiny tool for listing directory contents.
